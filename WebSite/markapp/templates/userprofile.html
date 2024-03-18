@@ -1,0 +1,15 @@
+{% block content %}
+
+    <div class="card-body">
+      <p><strong>Username:</strong> {{ user.username }}</p><br><br>
+        <p><strong>Pic:</strong> {{ form.profile_pic }}</p><br><br>
+        <p><strong>Bio:</strong> {{ form.bio }}</p><br><br>
+        <p><strong>Rank:</strong> {{ form.title }}</p><br><br>
+      <p><strong>Score:</strong> {{ form.score }}</p><br><br>
+
+      
+    <a href="{% url 'editprofile' %}">Edit</a>
+    
+    </div>
+
+{% endblock content %}
