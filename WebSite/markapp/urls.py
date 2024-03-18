@@ -1,9 +1,15 @@
 from django.contrib import admin
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LogoutView
+
 urlpatterns = [
-    path('', views.getemployeedata),
-    path('login/', views.user_login, name='login'),
-    path('logout/', views.logoutpage, name='logout'),
-    path('registration/', views.user_signup, name='registration')
+
+    path('login/', views.login_view, name='login'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('registration/', views.register, name='registration'),
+    path('userprofile/', views.user_profile, name='userprofile'),
+    path('editprofile',views.edit_profile, name='editprofile'),
+    path('tasklist/', views.task_list, name='tasklist'),
+    path('taskcreate/',views.task_create, name='taskcreate')
 ]
