@@ -45,3 +45,6 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.user)
+
+
+# CLASS GROUPS VIEW TASK_LIST HTML

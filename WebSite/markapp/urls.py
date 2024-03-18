@@ -10,6 +10,6 @@ urlpatterns = [
     path('registration/', views.register, name='registration'),
     path('userprofile/', views.user_profile, name='userprofile'),
     path('editprofile',views.edit_profile, name='editprofile'),
-    path('tasklist', views.task_list, name='tasklist'),
-    path('taskcreate',views.task_create, name='taskcreate')
+    path('tasklist/', views.task_list, name='tasklist'),
+    path('taskcreate/',views.task_create, name='taskcreate')
 ]
