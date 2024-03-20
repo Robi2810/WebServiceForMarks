@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Profile, Achievement, Task
+from .models import Profile, Achievement, Task, CustomGroups
 
 
 class SignUpForm(UserCreationForm):
@@ -37,3 +37,10 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['title', 'description', 'complete', 'deadline']
+
+
+class GroupForm(forms.ModelForm):
+    class Meta:
+        model = CustomGroups
+        fields = ['name', 'created_by', 'description']
+

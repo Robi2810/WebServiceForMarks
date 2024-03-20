@@ -3,8 +3,8 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from .models import Profile, Achievement, Task
-from .forms import ProfileForm, AchievementForm, TaskForm, SignUpForm, ProfileEditForm
+from .models import Profile, Achievement, Task, CustomGroups
+from .forms import ProfileForm, AchievementForm, TaskForm, SignUpForm, ProfileEditForm, GroupForm
 
 
 def register(request):
@@ -84,3 +84,45 @@ def task_create(request):
 def task_list(request):
     tasks = Task.objects.all()
     return render(request, 'task_list.html', {'tasks': tasks})
+# Для руководителя выбор ачивки
+
+
+@login_required(login_url='login')
+def create_group(request):
+    form = GroupForm
+    if request.method == 'POST':
+        form = GroupForm(request.POST)
+        # print(form)
+        print(request.POST.get('name'), request.user, request.POST.get('description'))
+        CustomGroups.objects.get_or_create(
+            name=request.POST.get('name'),
+            created_by=request.user,
+            description=request.POST.get('description')
+        )
+        return redirect('groups')
+        # if form.is_valid():
+        #     form.save()
+        #     # CustomGroups.objects.get_or_create(
+        #     #     name=request.POST.get('name'),
+        #     #     created_by=request.user,
+        #     #     description=request.POST.get('description')
+        #     # )
+        #     print(request.POST.get('name'),request.user, request.POST.get('description'))
+        #     return redirect('tasklist')
+    return render(request, 'create_group.html', {'group': form})
+
+
+@login_required(login_url='login')
+def group_view(request):
+    user_group = CustomGroups.objects.filter(created_by=request.user)
+    return render(request, 'group_view.html', {'usergroup': user_group})
+
+
+@login_required(login_url='login')
+def edit_group(request):
+    group = CustomGroups.objects.filter(created_by=request.user)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        desc = request.POST.get('description')
+        users = request.POST.get('users')
+
