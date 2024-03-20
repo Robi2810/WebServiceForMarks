@@ -87,35 +87,22 @@ def task_list(request):
 # Для руководителя выбор ачивки
 
 
-@login_required(login_url='login')
 def create_group(request):
-    form = GroupForm
+    form = GroupForm()  # Fixed form initialization
     if request.method == 'POST':
         form = GroupForm(request.POST)
-        # print(form)
-        print(request.POST.get('name'), request.user, request.POST.get('description'))
-        CustomGroups.objects.get_or_create(
-            name=request.POST.get('name'),
-            created_by=request.user,
-            description=request.POST.get('description')
-        )
-        return redirect('groups')
-        # if form.is_valid():
-        #     form.save()
-        #     # CustomGroups.objects.get_or_create(
-        #     #     name=request.POST.get('name'),
-        #     #     created_by=request.user,
-        #     #     description=request.POST.get('description')
-        #     # )
-        #     print(request.POST.get('name'),request.user, request.POST.get('description'))
-        #     return redirect('tasklist')
-    return render(request, 'create_group.html', {'group': form})
+        if form.is_valid():
+            new_group = form.save(commit=False)
+            new_group.save()
+            new_group.created_by.add(request.user)
+            return redirect('groups')  # Make sure 'groupview' is the correct name of your URL pattern
+    return render(request, 'create_group.html', {'form': form})
 
 
 @login_required(login_url='login')
 def group_view(request):
-    user_group = CustomGroups.objects.filter(created_by=request.user)
-    return render(request, 'group_view.html', {'usergroup': user_group})
+    user_groups = CustomGroups.objects.filter(created_by__in=[request.user])
+    return render(request, 'group_view.html', {'user_groups': user_groups})
 
 
 @login_required(login_url='login')

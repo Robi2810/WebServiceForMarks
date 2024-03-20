@@ -1,26 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My groups</title>
-</head>
-<body>
-    <h2>Group List</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for group in usergroup %}
-                <tr>
-                    <td>{{ group.name }}</td>
-                    <td>{{ group.description }}</td>
-                </tr>
+{% block content %}
+<div class="container">
+    <h2>Your Groups</h2>
+    <a href="{% url 'creategroup' %}" class="btn btn-primary">Create New Group</a>
+    <hr>
+    {% if user_groups %}
+        <div class="list-group">
+            {% for group in user_groups %}
+                    <h5 class="mb-1">{{ group.name }}</h5>
+                    <p class="mb-1">{{ group.description }}</p>
+                    <small>Created by: {{ group.created_by.all|join:", " }}</small>
+                </a>
             {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+        </div>
+    {% else %}
+        <p>You have not created or joined any groups yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
