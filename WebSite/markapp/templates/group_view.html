@@ -1,3 +1,5 @@
+<!-- Assuming you have a base.html -->
+
 {% block content %}
 <div class="container">
     <h2>Your Groups</h2>
@@ -6,10 +8,28 @@
     {% if user_groups %}
         <div class="list-group">
             {% for group in user_groups %}
-                    <h5 class="mb-1">{{ group.name }}</h5>
-                    <p class="mb-1">{{ group.description }}</p>
-                    <small>Created by: {{ group.created_by.all|join:", " }}</small>
-                </a>
+                <div class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">{{ group.group.name }}</h5> <!-- Adjusted for the possible GroupProfile structure -->
+                    <small>Created by: {{ group.creator.username }}</small> <!-- Assuming creator is a direct attribute -->
+                    <div>
+                        <h6>Members:</h6>
+                        <ul>
+                        {% for user in group.group.user_set.all %} <!-- Accessing users through the Group relation -->
+                            <li>{{ user.get_full_name|default:user.username }}</li>
+                        {% empty %}
+                            <li>No members</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <a href="{% url 'addusertogroup' group.group.id %}" class="btn btn-secondary mt-2">Add Users</a>
+
+                    {% if request.user == group.creator %}
+                    <form action="{% url 'delete_group' group.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this group?');">Delete Group</button>
+                    </form>
+                    {% endif %}
+                </div>
             {% endfor %}
         </div>
     {% else %}

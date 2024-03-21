@@ -7,11 +7,23 @@
         <p><strong>Rank:</strong> {{ form.title }}</p><br><br>
       <p><strong>Score:</strong> {{ form.score }}</p><br><br>
 
-      
     <a href="{% url 'editprofile' %}">Edit</a>
         <br><br>
-        <a href="{% url 'creategroup' %}">Create Group</a>
-    
+        <a href="{% url 'groups' %}">Your Groups</a>
+        <br><br>
+    <hr>
+    <h3>Groups you're in</h3>
+    {% if user_groups %}
+        <div class="list-group">
+            {% for group in user_groups %}
+                <a class="list-group-item list-group-item-action">
+                    {{ group.name }}
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You are not part of any groups yet.</p>
+    {% endif %}
     </div>
 
 {% endblock content %}

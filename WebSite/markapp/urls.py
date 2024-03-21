@@ -14,4 +14,6 @@ urlpatterns = [
     path('taskcreate/', views.task_create, name='taskcreate'),
     path('creategroup/', views.create_group,name='creategroup'),
     path('groups/', views.group_view,name='groups'),
+    path('groups/<int:group_id>/add-users/', views.add_user_to_group, name='addusertogroup'),
+    path('groups/<int:group_id>/delete/', views.delete_group, name='delete_group'),
 ]

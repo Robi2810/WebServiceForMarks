@@ -2,9 +2,12 @@ from django.contrib.auth.models import User, Group
 from django.db import models
 
 
-class CustomGroups(Group):
-    created_by = models.ManyToManyField(User, blank=True)  # Removed null=True for ManyToManyField
-    description = models.TextField(blank=True, null=True)
+class GroupProfile(models.Model):
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='profile')
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_groups')
+
+    def __str__(self):
+        return f"{self.group.name} profile"
 
 
 class Task(models.Model):
@@ -14,7 +17,7 @@ class Task(models.Model):
     complete = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     deadline = models.DateTimeField(blank=True, null=True)
-    current_group = models.ForeignKey(CustomGroups, on_delete=models.CASCADE, null=True, blank=True)
+    current_group = models.ForeignKey(GroupProfile, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.title

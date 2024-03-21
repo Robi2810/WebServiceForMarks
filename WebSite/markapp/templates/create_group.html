@@ -2,22 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Group</title>
+    <title>Create New Group</title>
 </head>
 <body>
-    <h2>Create Group</h2>
-    <form method="POST">
-        {% csrf_token %}
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div>
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" required></textarea>
-        </div>
-        <button type="submit">Create group</button>
-    </form>
+    <div class="container">
+        <h2>Create New Group</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Create Group</button>
+        </form>
+    </div>
 </body>
 </html>

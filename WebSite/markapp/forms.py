@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User, Group
 
-from .models import Profile, Achievement, Task, CustomGroups
+from .models import Profile, Achievement, Task, GroupProfile
 
 
 class SignUpForm(UserCreationForm):
@@ -39,8 +40,51 @@ class TaskForm(forms.ModelForm):
         fields = ['title', 'description', 'complete', 'deadline']
 
 
-class GroupForm(forms.ModelForm):
+class GroupProfileForm(forms.ModelForm):
     class Meta:
-        model = CustomGroups
-        fields = ['name', 'created_by', 'description']
+        model = GroupProfile
+        fields = ['group', 'creator']
+        widgets = {
+            'group': forms.Select(attrs={'class': 'form-control'}),
+            'creator': forms.Select(attrs={'class': 'form-control'}),
+        }
 
+
+class GroupCreationForm(forms.ModelForm):
+    user_email = forms.EmailField(required=False, help_text='Enter the email of the user you want to add to the group.')
+
+    class Meta:
+        model = Group
+        fields = ['name']
+
+    def clean_user_email(self):
+        email = self.cleaned_data.get('user_email')
+        if email:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise ValidationError("No user with this email exists.")
+            return email
+        return None
+
+
+class AddUsersToGroupForm(forms.Form):
+    emails = forms.CharField(widget=forms.Textarea, help_text='Enter each email on a new line.')
+
+    def clean_emails(self):
+        emails_str = self.cleaned_data.get('emails')
+        emails_list = emails_str.split()
+        users = []
+        non_existing_emails = []
+
+        for email in emails_list:
+            try:
+                user = User.objects.get(email=email.strip())
+                users.append(user)
+            except User.DoesNotExist:
+                non_existing_emails.append(email)
+
+        if non_existing_emails:
+            raise ValidationError(f"No users found for the following emails: {', '.join(non_existing_emails)}")
+
+        return users

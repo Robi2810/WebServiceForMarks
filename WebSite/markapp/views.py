@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from .models import Profile, Achievement, Task, CustomGroups
-from .forms import ProfileForm, AchievementForm, TaskForm, SignUpForm, ProfileEditForm, GroupForm
+from .models import Profile, Achievement, Task, GroupProfile, User, Group
+from .forms import ProfileForm, AchievementForm, TaskForm, SignUpForm, ProfileEditForm, GroupProfileForm, GroupCreationForm, AddUsersToGroupForm
 
 
 def register(request):
@@ -38,12 +38,16 @@ def login_view(request):
 @login_required(login_url='login')
 def user_profile(request):
     userprofile = Profile.objects.get(user=request.user)
+    usergroups = request.user.groups.all()
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=userprofile)
         if form.is_valid():
             form.save()
             return redirect('userprofile')
-    return render(request, 'userprofile.html', {'form': userprofile})
+    else:
+        form = ProfileForm(instance=userprofile)
+    return render(request, 'userprofile.html', {'form': userprofile, 'user_groups': usergroups})
 
 
 @login_required(login_url='login')
@@ -88,28 +92,56 @@ def task_list(request):
 
 
 def create_group(request):
-    form = GroupForm()  # Fixed form initialization
     if request.method == 'POST':
-        form = GroupForm(request.POST)
+        form = GroupCreationForm(request.POST)
         if form.is_valid():
-            new_group = form.save(commit=False)
-            new_group.save()
-            new_group.created_by.add(request.user)
-            return redirect('groups')  # Make sure 'groupview' is the correct name of your URL pattern
+            new_group = form.save()
+            user_email = form.cleaned_data.get('user_email')
+            if user_email:
+                user = User.objects.get(email=user_email)
+                new_group.user_set.add(user)
+
+            GroupProfile.objects.create(group=new_group, creator=request.user)
+
+            return redirect('groups')
+    else:
+        form = GroupCreationForm()
+
     return render(request, 'create_group.html', {'form': form})
 
 
 @login_required(login_url='login')
 def group_view(request):
-    user_groups = CustomGroups.objects.filter(created_by__in=[request.user])
+    user_groups = GroupProfile.objects.filter(creator=request.user)
     return render(request, 'group_view.html', {'user_groups': user_groups})
 
 
 @login_required(login_url='login')
-def edit_group(request):
-    group = CustomGroups.objects.filter(created_by=request.user)
+def add_user_to_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    group_profile = get_object_or_404(GroupProfile, group=group)
+
     if request.method == 'POST':
-        name = request.POST.get('name')
-        desc = request.POST.get('description')
-        users = request.POST.get('users')
+        form = AddUsersToGroupForm(request.POST)
+        if form.is_valid():
+            users = form.cleaned_data.get('emails')
+            for user in users:
+                group.user_set.add(user)
+            return redirect('groups')  # Adjust redirect as needed
+    else:
+        form = AddUsersToGroupForm()
+
+    context = {'form': form, 'group': group}
+    return render(request, 'addusertogroup.html', context)
+
+
+def delete_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+
+    if request.user.has_perm('auth.delete_group') or group.profile.creator == request.user:
+        group.delete()
+        return redirect('groups')
+    else:
+
+        return redirect('groups')
 
