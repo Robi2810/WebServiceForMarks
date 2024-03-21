@@ -1,0 +1,35 @@
+{% block content %}
+<div class="container">
+    <h2>Tasks for {{ group_profile.group.name }}</h2>
+    {% if request.user == group_profile.creator %}
+        <a href="{% url 'taskcreate' %}" class="btn btn-primary">Create Task</a>
+    {% endif %}
+    <hr>
+    {% if tasks %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>Deadline</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.description }}</td>
+                        <td>{{ task.user.get_full_name|default:task.user.username }}</td>
+                        <td>{{ task.complete|yesno:"Completed,Not Completed" }}</td>
+                        <td>{{ task.deadline|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No tasks in this group yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

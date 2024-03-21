@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 from .models import Profile, Achievement, Task, GroupProfile, User, Group
 from .forms import ProfileForm, AchievementForm, TaskForm, SignUpForm, ProfileEditForm, GroupProfileForm, GroupCreationForm, AddUsersToGroupForm
@@ -74,15 +75,33 @@ def achievement_create(request):
 
 
 @login_required(login_url='login')
-def task_create(request):
-    form = TaskForm()
+def create_task(request):
     if request.method == 'POST':
-        form = TaskForm(request.POST)
+        form = TaskForm(request.POST, user=request.user)
         if form.is_valid():
-            form.save()
-            return redirect('tasklist')
+            task = form.save(commit=False)
+            task.save()
+            form.save_m2m()
+            return redirect('group_tasks', group_id=task.current_group.id)
+    else:
+        form = TaskForm(user=request.user)
+        user_groups = GroupProfile.objects.filter(creator=request.user)
+        form.fields['current_group'].queryset = user_groups
+
     return render(request, 'task_create.html', {'form': form})
 
+
+def get_group_users(request, group_id):
+    group_profile = get_object_or_404(GroupProfile, id=group_id)
+    users = list(group_profile.group.user_set.values('id', 'username'))
+    return JsonResponse(users, safe=False)
+
+
+@login_required(login_url='login')
+def group_tasks(request, group_id):
+    group_profile = get_object_or_404(GroupProfile, id=group_id, group__user=request.user)
+    tasks = Task.objects.filter(current_group=group_profile).order_by('-created')
+    return render(request, 'group_tasks.html', {'tasks': tasks, 'group_profile': group_profile})
 
 @login_required(login_url='login')
 def task_list(request):
@@ -91,6 +110,7 @@ def task_list(request):
 # Для руководителя выбор ачивки
 
 
+@login_required(login_url='login')
 def create_group(request):
     if request.method == 'POST':
         form = GroupCreationForm(request.POST)
@@ -127,7 +147,7 @@ def add_user_to_group(request, group_id):
             users = form.cleaned_data.get('emails')
             for user in users:
                 group.user_set.add(user)
-            return redirect('groups')  # Adjust redirect as needed
+            return redirect('groups')
     else:
         form = AddUsersToGroupForm()
 
@@ -135,6 +155,7 @@ def add_user_to_group(request, group_id):
     return render(request, 'addusertogroup.html', context)
 
 
+@login_required(login_url='login')
 def delete_group(request, group_id):
     group = get_object_or_404(Group, id=group_id)
 

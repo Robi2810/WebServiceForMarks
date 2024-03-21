@@ -37,7 +37,27 @@ class AchievementForm(forms.ModelForm):
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'complete', 'deadline']
+        fields = ['title', 'description', 'deadline', 'current_group', 'user']
+        widgets = {
+            'deadline': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'current_group': forms.Select(attrs={'class': 'form-control'}),
+            'user': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(TaskForm, self).__init__(*args, **kwargs)
+        self.fields['user'].queryset = User.objects.none()
+
+        if 'current_group' in self.data:
+            try:
+                group_id = int(self.data.get('current_group'))
+                self.fields['user'].queryset = GroupProfile.objects.get(id=group_id).group.user_set.all()
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:
+            self.fields['user'].queryset = self.instance.current_group.group.user_set.all()
+
 
 
 class GroupProfileForm(forms.ModelForm):
