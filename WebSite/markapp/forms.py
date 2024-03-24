@@ -31,7 +31,16 @@ class ProfileEditForm(forms.ModelForm):
 class AchievementForm(forms.ModelForm):
     class Meta:
         model = Achievement
-        fields = ['title', 'description', 'weight']
+        fields = ['title', 'description', 'weight', 'ach_img']
+
+
+class GroupTaskAchievementForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['achievement']  # Ensure this is correct based on your model
+        widgets = {
+            'achievement': forms.Select(attrs={'class': 'form-control'}),
+        }
 
 
 class TaskForm(forms.ModelForm):
@@ -57,7 +66,6 @@ class TaskForm(forms.ModelForm):
                 pass
         elif self.instance.pk:
             self.fields['user'].queryset = self.instance.current_group.group.user_set.all()
-
 
 
 class GroupProfileForm(forms.ModelForm):

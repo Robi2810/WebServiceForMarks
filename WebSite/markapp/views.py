@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from .models import Profile, Achievement, Task, GroupProfile, User, Group
-from .forms import ProfileForm, AchievementForm, TaskForm, SignUpForm, ProfileEditForm, GroupProfileForm, GroupCreationForm, AddUsersToGroupForm
+from .forms import ProfileForm, AchievementForm, TaskForm, SignUpForm, ProfileEditForm, GroupProfileForm,\
+    GroupCreationForm, AddUsersToGroupForm
 
 
 def register(request):
@@ -40,6 +41,7 @@ def login_view(request):
 def user_profile(request):
     userprofile = Profile.objects.get(user=request.user)
     usergroups = request.user.groups.all()
+    user_achievements = userprofile.achievement.all()
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=userprofile)
@@ -48,7 +50,8 @@ def user_profile(request):
             return redirect('userprofile')
     else:
         form = ProfileForm(instance=userprofile)
-    return render(request, 'userprofile.html', {'form': userprofile, 'user_groups': usergroups})
+    return render(request, 'userprofile.html', {'form': userprofile,
+                                                'user_groups': usergroups, 'user_achievements': user_achievements})
 
 
 @login_required(login_url='login')
@@ -64,14 +67,19 @@ def edit_profile(request):
 
 
 @login_required(login_url='login')
-def achievement_create(request):
-    form = AchievementForm()
+def create_achievement(request, group_id):
+    group_profile = get_object_or_404(GroupProfile, id=group_id, creator=request.user)
     if request.method == 'POST':
-        form = AchievementForm(request.POST)
+        form = AchievementForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            new_achievement = form.save(commit=False)
+            new_achievement.current_group = group_profile
+            new_achievement.save()
             return redirect('achievement_list')
-    return render(request, 'achievement_form.html', {'form': form})
+    else:
+        form = AchievementForm()
+
+    return render(request, 'achievement_create.html', {'form': form})
 
 
 @login_required(login_url='login')
@@ -99,9 +107,11 @@ def get_group_users(request, group_id):
 
 @login_required(login_url='login')
 def group_tasks(request, group_id):
-    group_profile = get_object_or_404(GroupProfile, id=group_id, group__user=request.user)
-    tasks = Task.objects.filter(current_group=group_profile).order_by('-created')
-    return render(request, 'group_tasks.html', {'tasks': tasks, 'group_profile': group_profile})
+    group_profile = get_object_or_404(GroupProfile, id=group_id)
+    tasks = Task.objects.filter(current_group=group_profile)
+    achievements = Achievement.objects.filter(current_group=group_profile)
+    return render(request, 'group_tasks.html', {'group_profile': group_profile, 'tasks': tasks, 'achievements': achievements})
+
 
 @login_required(login_url='login')
 def task_list(request):
@@ -166,3 +176,45 @@ def delete_group(request, group_id):
 
         return redirect('groups')
 
+
+@login_required(login_url='login')
+def achievement_list(request):
+    # Achievements obtained by completing tasks
+    completed_task_achievements = Achievement.objects.filter(
+        task_achievement__user=request.user,
+        task_achievement__complete=True
+    ).distinct()
+
+    # Achievements created for groups where the user is the creator
+    created_group_achievements = Achievement.objects.filter(
+        current_group__creator=request.user
+    ).distinct()
+
+    # Combine all unique achievements
+    all_achievements = (completed_task_achievements | created_group_achievements).distinct()
+
+    return render(request, 'achievement_list.html', {'achievements': all_achievements})
+
+
+@login_required
+def bulk_assign_achievements(request, group_id):
+    if request.method == 'POST':
+        group_profile = get_object_or_404(GroupProfile, id=group_id, creator=request.user)
+        for key, value in request.POST.items():
+            if key.startswith('achievement_'):
+                task_id = key.split('_')[1]
+                achievement_id = value
+                task = Task.objects.get(id=task_id, current_group=group_profile)
+                if achievement_id:
+                    achievement = Achievement.objects.get(id=achievement_id)
+                    task.achievement = achievement
+                    if task.user:
+                        user_profil = Profile.objects.get(user=task.user)
+                        user_profil.achievement.add(achievement)
+                        user_profil.score += achievement.weight
+                        user_profil.save()
+                else:
+                    task.achievement = None
+                task.save()
+        return redirect('group_tasks', group_id=group_id)
+    # Add else condition for GET request or error handling

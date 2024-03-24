@@ -25,6 +25,22 @@
     {% else %}
         <p>You are not part of any groups yet.</p>
     {% endif %}
+        <h3>Your Achievements</h3>
+{% if user_achievements %}
+    <ul>
+        {% for achievement in user_achievements %}
+            <li>
+                <h4>{{ achievement.title }}</h4>
+                <p>{{ achievement.description }}</p>
+                <p>{{ achievement.weight }}</p>
+                <!-- Include other fields as needed -->
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no achievements yet.</p>
+{% endif %}
+
     </div>
 
 {% endblock content %}
