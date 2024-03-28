@@ -1,0 +1,48 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Golos;
+  border: none;
+  outline: none;
+}
+
+@font-face {
+  font-family: "Golos";
+  src: url("../fonts/Golos-Text_Regular.woff2") format("woff2"),
+    url("../fonts/Golos-Text_Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.text-field label {
+  color: #6f7985;
+  margin-bottom: 10px;
+}
+
+.text-field input {
+  background: #f7f8fa;
+  color: black;
+  border: 1px solid #dce1e5;
+  border-radius: 8px;
+  padding: 9px 12px;
+
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.text-field input::placeholder {
+  color: #80858e;
+}

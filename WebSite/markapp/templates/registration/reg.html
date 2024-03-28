@@ -1,9 +1,115 @@
+{% load static %}
 <!DOCTYPE html>
-<h1>Signup</h1>
-<form method="POST">
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}" />
+    <style>
+      .reg-container {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        width: 400px;
+      }
+    </style>
+  </head>
+  <body>
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Signup</button>
-    <a href="{% url 'login' %}">Already have account?</a>
-</form>
+    <div class="reg-container">
+      <h1>Регистрация</h1>
+      <form method="POST" class="form">
+        <input
+          type="hidden"
+          name="csrfmiddlewaretoken"
+          value="rPa7v8EYMHR1Ih5vmelUE2aeduxrlLom0VYar98yh4ECixK0HoWHUQbDN4i4y8zb"
+        />
+        <div class="text-field">
+          <label for="id_username">Username:</label>
+          <input
+            type="text"
+            name="username"
+            maxlength="150"
+            autofocus
+            required
+            id="id_username"
+          />
+          <span class="helptext"
+            >Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.</span
+          >
+        </div>
+        <div class="text-field">
+          <label for="id_first_name">First name:</label>
+          <input
+            type="text"
+            name="first_name"
+            maxlength="40"
+            required
+            id="id_first_name"
+          />
+        </div>
+        <div class="text-field">
+          <label for="id_last_name">Last name:</label>
+          <input
+            type="text"
+            name="last_name"
+            maxlength="40"
+            required
+            id="id_last_name"
+          />
+        </div>
+        <div class="text-field">
+          <label for="id_email">Email:</label>
+          <input
+            type="email"
+            name="email"
+            maxlength="320"
+            required
+            id="id_email"
+          />
+        </div>
+        <div class="text-field">
+          <label for="id_password1">Password:</label>
+          <input
+            type="password"
+            name="password1"
+            autocomplete="new-password"
+            required
+            id="id_password1"
+          />
+          <span class="helptext">
+            <ul>
+              <li>
+                Your password can’t be too similar to your other personal
+                information.
+              </li>
+              <li>Your password must contain at least 8 characters.</li>
+              <li>Your password can’t be a commonly used password.</li>
+              <li>Your password can’t be entirely numeric.</li>
+            </ul>
+          </span>
+        </div>
+        <div class="text-field">
+          <label for="id_password2">Password confirmation:</label>
+          <input
+            type="password"
+            name="password2"
+            autocomplete="new-password"
+            required
+            id="id_password2"
+          />
+          <span class="helptext">
+            Enter the same password as before, for verification.
+          </span>
+        </div>
+        <button type="submit">Signup</button>
+        <a href="/login/">Already have account?</a>
+      </form>
+    </div>
+  </body>
 </html>

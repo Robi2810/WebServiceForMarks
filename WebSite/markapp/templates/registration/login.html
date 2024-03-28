@@ -1,74 +1,138 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
     <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}" />
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-        .login-container {
-            width: 300px;
-            padding: 20px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            text-align: center;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.5s ease-out;
-        }
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -60%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-        }
-        input[type="text"], input[type="password"] {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .login-btn, .signup-btn {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .login-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .signup-btn {
-            background-color: #f44336;
-            color: white;
-        }
+      .login-container {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        width: 400px;
+      }
+
+      .header {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 20px;
+        margin-bottom: 24px;
+      }
+
+      .eye {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        cursor: pointer;
+      }
+
+      .forgot-link {
+        color: black;
+        font-family: Golos;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+        margin-bottom: 30px;
+      }
+
+      a.forgot-link:visited {
+        color: black;
+      }
+
+      .login-button {
+        background-color: #4480f3;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 20px;
+        color: white;
+        border-radius: 8px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .reg-block {
+        display: flex;
+        align-self: center;
+      }
+
+      .reg-link {
+        text-decoration: none;
+        color: #4480f3;
+        margin-left: 8px;
+      }
+
+      a.reg-link:visited {
+        color: #4480f3;
+      }
     </style>
-</head>
-<body>
-
-<div class="login-container">
-    <h2>Login</h2>
-    <form action="{% url 'login' %}" method="post">
+  </head>
+  <body>
+    <div class="login-container">
+      <h2 class="header">Вход в аккаунт</h2>
+      <form action="{% url 'login' %}" method="post" class="form">
         {% csrf_token %}
-        <input type="text" placeholder="Username" name="username" required>
-        <input type="password" placeholder="Password" name="password" required>
-        <button type="submit" class="login-btn">Login</button>
-    </form>
-    <button onclick="window.location='{% url 'registration' %}';" class="signup-btn">Sign Up</button>
-</div>
-
-</body>
+        <div class="text-field">
+          <label for="username">Логин</label>
+          <input
+            type="text"
+            placeholder="Введите логин"
+            name="username"
+            required
+          />
+        </div>
+        <div class="text-field">
+          <label for="password">Пароль</label>
+          <input
+            id="password-input"
+            type="password"
+            placeholder="Введите пароль"
+            name="password"
+            required
+          />
+          <svg
+            onclick="show_hide_password()"
+            class="eye"
+            width="40"
+            height="40"
+            viewBox="0 0 40 40"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12.7071 19.2929C12.3166 19.6834 12.3166 20.3166 12.7071 20.7071L15.0502 23.0503C17.7839 25.7839 22.216 25.7839 24.9497 23.0503L27.2929 20.7071C27.6834 20.3166 27.6834 19.6834 27.2929 19.2929L24.9497 16.9498C22.2161 14.2161 17.7839 14.2161 15.0502 16.9498L12.7071 19.2929ZM23.5 20C23.5 21.933 21.933 23.5 20 23.5C18.067 23.5 16.5 21.933 16.5 20C16.5 18.067 18.067 16.5 20 16.5C21.933 16.5 23.5 18.067 23.5 20ZM20 21.5C20.8284 21.5 21.5 20.8284 21.5 20C21.5 19.1716 20.8284 18.5 20 18.5C19.1715 18.5 18.5 19.1716 18.5 20C18.5 20.8284 19.1715 21.5 20 21.5Z"
+              fill="#1F1433"
+            />
+          </svg>
+        </div>
+        <button type="submit" class="login-button">Login</button>
+      </form>
+      <div class="reg-block">
+        <div class="no-account">Ещё нет аккаунта?</div>
+        <a href="{% url 'registration' %}" class="reg-link">
+          Зарегистрироваться
+        </a>
+      </div>
+    </div>
+  </body>
+  <script>
+    function show_hide_password() {
+      var input = document.getElementById("password-input");
+      if (input.getAttribute("type") == "password") {
+        input.setAttribute("type", "text");
+      } else {
+        input.setAttribute("type", "password");
+      }
+      return false;
+    }
+  </script>
 </html>
